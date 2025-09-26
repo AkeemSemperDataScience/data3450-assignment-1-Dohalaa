@@ -69,60 +69,24 @@ def cohortCompare(df, cohorts, statistics=['mean', 'median', 'std', 'min', 'max'
     This function takes a dataframe and a list of cohort column names, and returns a dictionary
     where each key is a cohort name and each value is an object containing the specified statistics
     """
-    # counts of the requested categorical columns
-    # stats of numeric columns by cohort value
+    result = {}
 
-    results = {"categorical_counts": {}, "cohort_stats": {} }         
+    # Numerical columns 
+    numeric_cols = df.select_dtypes(include="number").columns.difference(cohorts)
 
-   # Numerical columns on which stats are calculated
-    num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+    # numerical
+    for col in numeric_cols:
+        metric = CohortMetric("numeric")
+        metric.set_values(df[col].dropna(), statistics)
+        result[col] = metric.to_dict()
 
-    for cat in cohorts:
-        # 1) Counts for the categorical column
-        results["categorical_counts"][cat] = df[cat].value_counts(dropna=False).to_dict()
+    # categorical
+    for col in cohorts:
+        metric = CohortMetric("categorical")
+        metric.set_values(df[col], statistics)
+        result[col] = metric.to_dict()
 
-        # 2) Stats by modality (level) of this column
-        results["cohort_stats"][cat] = {}
-        for level, sub in df.groupby(cat, dropna=False):
-            cm = CohortMetric(f"{cat}={level}")
-
-            # Each statistic is a Series (index = numerical columns)
-            if 'mean' in statistics:
-                cm.setMean(sub[num_cols].mean())
-            if 'median' in statistics:
-                cm.setMedian(sub[num_cols].median())
-            if 'std' in statistics:
-                cm.setStd(sub[num_cols].std())
-            if 'min' in statistics:
-                cm.setMin(sub[num_cols].min())
-            if 'max' in statistics:
-                cm.setMax(sub[num_cols].max())
-
-            results["cohort_stats"][cat][level] = cm
-
-    return results
-
-
-  
-  
-# 3 - A function that prints the dictionary returned by cohortCompare in a readable way
-def pretty_print(results):
-    print("=== Categorical Counts ===")
-    for cat in results.get("categorical_counts", {}):
-        print("")
-        print("Column:", cat)
-        counts = results["categorical_counts"][cat]
-        for k in counts:
-            print(" ", k, ":", counts[k])
-
-    print("\n=== Cohort Statistics ===")
-    for cat in results.get("cohort_stats", {}):
-        print("")
-        print("Cohort column:", cat)
-        levels = results["cohort_stats"][cat]
-        for level in levels:
-            cm = levels[level]
-            print(cm)
+    return result
 
 
 
