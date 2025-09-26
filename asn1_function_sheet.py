@@ -22,28 +22,6 @@ def age_splitter(df, col_name, age_threshold):
     return below, above_equal
 
 
-# 2 Percentage Under 30
-below_30, above_equal_30 = age_splitter(df, "Age", 30)
-pct_below_30 = (len(below_30) / len(df)) * 100
-print("The percentage of people that are < 30 years old: " +str(round(pct_below_30, 2)) + "%")
-
-# 3 - 1978 Earnings Comparison
-# ARITHMETIC COMPARISON: we can compare the mean of each group
-
-mean_below30 = below_30["Earnings_1978"].mean()
-mean_above30 = above_equal_30["Earnings_1978"].mean()
-
-print("Mean of the 1978 earnings of the group of people < 30 years old: " +str(round(mean_below30, 2)))
-print("Mean of the 1978 earnings of the group of people >= 30 years old: " +str(round(mean_above30, 2)))
-
-# VISUAL COMPARISON: 
-
-# We add a column to identify age groups
-df["AgeGroup"] = df["Age"].apply(lambda x: "<30" if x < 30 else ">=30")
-
-# we create a boxplot
-sns.boxplot(x = "AgeGroup", y = "Earnings_1978", data = df)
-
  
  
  
@@ -79,15 +57,6 @@ def effectSizer(df, num_col, cat_col):
     d = diff / np.sqrt(pooled_var)
     return d
 
-
-# 2. Effect sizes comparison
-
-race = effectSizer(df, "Earnings_1978", "Race")
-print("Race: ", round(race,3))
-hisp = effectSizer(df, "Earnings_1978", "Hisp")
-print("Hisp: ", round(hisp,3))
-status = effectSizer(df, "Earnings_1978", "MaritalStatus")
-print("Marital status: ", round(status,3))
 
 
 
@@ -134,17 +103,6 @@ def cohortCompare(df, cohorts, statistics=['mean', 'median', 'std', 'min', 'max'
     return results
 
 
-''' 2. Comparison:
-At a high level, this dataset doesn't look fully representative of the U.S. population in the 
-late 1970s, and even less so today. The reason is that the sample comes from a specific 
-program or study group, not a random survey of the whole country. For example, the shares of people 
-by education, marital status, or ethnic group don't match exactly what national statistics from the 
-1970s would show.
-I assessed this by looking at the distributions of demographic variables in the dataset 
-(such as education level, marital status, and ethnicity) and by checking the summary statistics 
-of age and earnings. When I compare these numbers with what is historically known about the U.S. 
-population, there are clear differences, so the dataset can't be considered nationally 
-representative.'''
   
   
 # 3 - A function that prints the dictionary returned by cohortCompare in a readable way
