@@ -20,3 +20,4 @@ def test_age_splitter_2():
     df_below, df_above_equal = age_splitter(df, 'age', 30)
     assert all(df_below['age'] < 30)
     assert all(df_above_equal['age'] >= 30)
+    
